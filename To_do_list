@@ -1,0 +1,71 @@
+import tkinter as tk
+from tkinter import messagebox
+import json
+import os
+
+FILE_NAME = "todo_gui_data.json"
+
+def load_tasks():
+    if os.path.exists(FILE_NAME):
+        with open(FILE_NAME, "r") as file:
+            return json.load(file)
+    return []
+
+def save_tasks():
+    with open(FILE_NAME, "w") as file:
+        json.dump(tasks, file)
+
+def add_task():
+    task = task_entry.get().strip()
+    if task:
+        tasks.append(task)
+        update_listbox()
+        save_tasks()
+        task_entry.delete(0, tk.END)
+    else:
+        messagebox.showwarning("Input Error", "Please enter a task.")
+
+def delete_task():
+    selected = listbox.curselection()
+    if selected:
+        index = selected[0]
+        tasks.pop(index)
+        update_listbox()
+        save_tasks()
+    else:
+        messagebox.showwarning("Selection Error", "Please select a task to delete.")
+
+def update_listbox():
+    listbox.delete(0, tk.END)
+    for task in tasks:
+        listbox.insert(tk.END, task)
+
+window = tk.Tk()
+window.title("To-Do List")
+window.geometry("400x450")
+window.resizable(False, False)
+
+task_entry = tk.Entry(window, font=("Arial", 14), width=24)
+task_entry.pack(pady=10)
+
+add_button = tk.Button(window, text="Add Task", width=20, command=add_task)
+add_button.pack(pady=5)
+
+frame = tk.Frame(window)
+frame.pack(pady=10)
+
+scrollbar = tk.Scrollbar(frame)
+scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+listbox = tk.Listbox(frame, width=40, height=10, font=("Arial", 12), yscrollcommand=scrollbar.set)
+listbox.pack(side=tk.LEFT)
+
+scrollbar.config(command=listbox.yview)
+
+delete_button = tk.Button(window, text="Delete Selected Task", width=25, command=delete_task)
+delete_button.pack(pady=10)
+
+tasks = load_tasks()
+update_listbox()
+
+window.mainloop()
